@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5340728220661855"
+     crossorigin="anonymous"></script>
+<meta charset="UTF-8">
+<title>Rupendra's First Gaming Website</title>
+<style>
+body{margin:0;font-family:Arial;background:#111;color:white;text-align:center}
+header{background:black;padding:15px}
+button{padding:10px 18px;margin:5px;font-size:15px;border:none;background:#00ffcc;cursor:pointer}
+button:hover{background:#00ccaa}
+.game{display:none;margin-top:20px}
+
+/* CLICK */
+#clickBox{background:#222;padding:30px;display:inline-block}
+
+/* SNAKE */
+canvas{background:black;border:2px solid white}
+
+/* BUBBLE SHOOTER */
+#bubbleCanvas{background:#111;border:2px solid white; display:block;margin:0 auto;}
+</style>
+</head>
+<body>
+<!-- Google AdSense Ad Unit -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-5340728220661855"
+     data-ad-slot="1234567890"
+     data-ad-format="auto"
+     data-full-width-responsive="true"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+<header>
+<h1>Rupendra's First Gaming Website</h1>
+<button onclick="show('click')">Click Game</button>
+<button onclick="show('snake')">Snake Game</button>
+<button onclick="show('bubble')">Bubble Shooter</button>
+</header>
+
+<!-- CLICK -->
+<div id="click" class="game">
+<div id="clickBox">
+<h2>Click Game</h2>
+<p>Score: <span id="clickScore">0</span></p>
+<button onclick="clickScore++;document.getElementById('clickScore').innerText=clickScore">CLICK</button>
+</div>
+</div>
+
+<!-- SNAKE -->
+<div id="snake" class="game">
+<h2>Snake Game</h2>
+<p>Score: <span id="snakeScore">0</span></p>
+<canvas id="snakeCanvas" width="400" height="400"></canvas>
+</div>
+
+<!-- BUBBLE SHOOTER -->
+<div id="bubble" class="game">
+<h2>Bubble Shooter</h2>
+<p>Score: <span id="bubbleScore">0</span></p>
+<p>Current Bubble Color: <span id="currentColor" style="font-weight:bold"></span></p>
+<canvas id="bubbleCanvas" width="400" height="600"></canvas>
+<p>Use left/right arrows to aim, spacebar to shoot.</p>
+</div>
+
+<script>
+/* ===== MENU ===== */
+function show(id){
+ document.querySelectorAll('.game').forEach(g=>g.style.display="none");
+ document.getElementById(id).style.display="block";
+ if(id==="snake") startSnake();
+ if(id==="bubble") startBubble();
+}
+
+/* ===== CLICK GAME ===== */
+let clickScore=0;
+
+/* ===== SNAKE GAME ===== */
+let snakeTimer;
+function startSnake(){
+ clearInterval(snakeTimer);
+ const c=document.getElementById("snakeCanvas");
+ const ctx=c.getContext("2d");
+
+ let snake=[{x:200,y:200}];
+ let dx=20,dy=0,lastDx=20,lastDy=0;
+ let food=randomFood();
+ let score=0;
+ let speed=160;
+ document.getElementById("snakeScore").innerText = score;
+
+ document.onkeydown=e=>{
+  if(e.key==="ArrowUp" && lastDy===0){dx=0;dy=-20}
+  if(e.key==="ArrowDown" && lastDy===0){dx=0;dy=20}
+  if(e.key==="ArrowLeft" && lastDx===0){dx=-20;dy=0}
+  if(e.key==="ArrowRight" && lastDx===0){dx=20;dy=0}
+ };
+
+ function gameLoop(){
+  let head={x:snake[0].x+dx,y:snake[0].y+dy};
+  lastDx=dx; lastDy=dy;
+
+  if(head.x<0||head.y<0||head.x>=400||head.y>=400 ||
+     snake.some(s=>s.x===head.x&&s.y===head.y)){
+   alert("Game Over! Score: "+score);
+   clearInterval(snakeTimer);
+   return;
+  }
+
+  snake.unshift(head);
+  if(head.x===food.x&&head.y===food.y){
+   score++;
+   document.getElementById("snakeScore").innerText = score;
+   food=randomFood();
+   speed=Math.max(60,speed-5);
+   clearInterval(snakeTimer);
+   snakeTimer=setInterval(gameLoop,speed);
+  } else snake.pop();
+
+  ctx.clearRect(0,0,400,400);
+  ctx.fillStyle="lime";snake.forEach(s=>ctx.fillRect(s.x,s.y,20,20));
+  ctx.fillStyle="red";ctx.fillRect(food.x,food.y,20,20);
+ }
+ snakeTimer=setInterval(gameLoop,speed);
+
+ function randomFood(){
+  return {x:Math.floor(Math.random()*20)*20,y:Math.floor(Math.random()*20)*20};
+ }
+}
+
+/* ===== BUBBLE SHOOTER ===== */
+let bubbleInterval;
+function startBubble(){
+ clearInterval(bubbleInterval);
+ const canvas=document.getElementById("bubbleCanvas");
+ const ctx=canvas.getContext("2d");
+ const bubbleRadius=20;
+ const rows=5;
+ const cols=10;
+ const colors=["red","green","blue","yellow","purple"];
+ let bubbles=[];
+ let bullets=[];
+ let score=0;
+ let aimX=200;
+ let currentColor=colors[Math.floor(Math.random()*colors.length)];
+ document.getElementById("currentColor").innerText=currentColor;
+
+ // Initialize bubbles
+ for(let r=0;r<rows;r++){
+  for(let c=0;c<cols;c++){
+   bubbles.push({x: c*40 + 20, y: r*40 + 20, color: colors[Math.floor(Math.random()*colors.length)]});
+  }
+ }
+
+ document.onkeydown=e=>{
+  if(e.key==="ArrowLeft"){aimX=Math.max(20,aimX-20);}
+  if(e.key==="ArrowRight"){aimX=Math.min(380,aimX+20);}
+  if(e.key===" "){ // shoot
+   bullets.push({x:aimX, y:580, r:8, color:currentColor, dy:-8});
+   // pick next bubble color randomly
+   currentColor=colors[Math.floor(Math.random()*colors.length)];
+   document.getElementById("currentColor").innerText=currentColor;
+  }
+ };
+
+ function draw(){
+  ctx.clearRect(0,0,400,600);
+  // bubbles
+  bubbles.forEach(b=>{
+   ctx.beginPath();
+   ctx.arc(b.x,b.y,bubbleRadius,0,Math.PI*2);
+   ctx.fillStyle=b.color; ctx.fill(); ctx.closePath();
+  });
+  // bullets
+  bullets.forEach(b=>{
+   ctx.beginPath();
+   ctx.arc(b.x,b.y,b.r,0,Math.PI*2);
+   ctx.fillStyle=b.color; ctx.fill(); ctx.closePath();
+  });
+  // aim line
+  ctx.strokeStyle="white";
+  ctx.beginPath();
+  ctx.moveTo(aimX,600);
+  ctx.lineTo(aimX,580);
+  ctx.stroke();
+ }
+
+ function update(){
+  // move bullets
+  bullets.forEach((b,i)=>{
+   b.y+=b.dy;
+   // check collision with bubbles
+   for(let j=bubbles.length-1;j>=0;j--){
+    let bub=bubbles[j];
+    let dx=b.x-bub.x, dy=b.y-bub.y;
+    if(Math.sqrt(dx*dx+dy*dy)<bubbleRadius+b.r){
+     if(b.color===bub.color){
+      bubbles.splice(j,1);
+      score++; document.getElementById("bubbleScore").innerText=score;
+     } else {
+      // attach bullet above bubble
+      bubbles.push({x:bub.x, y:bub.y-2*bubbleRadius, color:b.color});
+     }
+     bullets.splice(i,1);
+     break;
+    }
+   }
+   if(b.y<0) bullets.splice(i,1);
+  });
+
+  // add new row every 20 points
+  if(score>0 && score%20===0 && !bubbles.some(b=>b.y<40)){
+   for(let c=0;c<cols;c++){
+    bubbles.push({x:c*40+20, y:0, color:colors[Math.floor(Math.random()*colors.length)]});
+   }
+  }
+ }
+
+ bubbleInterval=setInterval(()=>{update(); draw();},30);
+}
+</script>
+
+</body>
+</html>
